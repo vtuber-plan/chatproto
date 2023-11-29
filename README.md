@@ -1,6 +1,24 @@
 # chatproto
-Large Language Model Chat Protocol
+Large Language Model Chat Protocol.
 
+The different chat prompt formats used by different Large Language Models have been a problem for developers. We developed `chatproto` to output the prompt format for different LLMs through a unified interface.
+
+## Quick Start
+```python
+from chatproto.conversation.history import ConversationHistory
+from chatproto.conversation.models.baichuan import baichuan
+
+history = ConversationHistory(
+    "SYSTEM_MESSAGE",
+    messages=[
+        (baichuan.roles[0], "user"),
+        (baichuan.roles[1], "assistant"),
+    ],
+    offset=0,
+    settings=baichuan
+)
+print(history.get_prompt())
+```
 
 ## Install
 
@@ -29,6 +47,4 @@ cd chatproto
 pip install --upgrade pip
 pip install .
 ```
-
-## Quick Start
 
