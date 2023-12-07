@@ -1,7 +1,7 @@
 import unittest
 
 from chatproto.conversation.history import ConversationHistory
-from chatproto.conversation.models.baichuan import baichuan
+from chatproto.conversation.models.baichuan2 import baichuan2
 
 
 class TestBaiChuanMethods(unittest.TestCase):
@@ -10,13 +10,13 @@ class TestBaiChuanMethods(unittest.TestCase):
         history = ConversationHistory(
             "SYSTEM_MESSAGE",
             messages=[
-                (baichuan.roles[0], "aaa"),
-                (baichuan.roles[1], "bbb"),
+                (baichuan2.roles[0], "aaa"),
+                (baichuan2.roles[1], "bbb"),
             ],
             offset=0,
-            settings=baichuan
+            settings=baichuan2
         )
-        self.assertEqual(history.get_prompt(), "SYSTEM_MESSAGE<reserved_102>aaa<reserved_103>bbb")
+        self.assertEqual(history.get_prompt(), "SYSTEM_MESSAGE<reserved_106>aaa<reserved_107>bbb")
 
 if __name__ == '__main__':
     unittest.main()

@@ -6,9 +6,8 @@ https://huggingface.co/baichuan-inc/Baichuan-13B-Chat/blob/main/modeling_baichua
 # Baichuan default template
 baichuan = ConversationSettings(
     name="baichuan",
-    roles=(" <reserved_102> ", " <reserved_103> "),
-    sep_style=SeparatorStyle.NO_COLON_TWO,
+    roles=("<reserved_102>", "<reserved_103>"),
+    sep_style=SeparatorStyle.NO_COLON_SINGLE,
     sep="",
-    sep2="</s>",
     stop_token_ids=[2, 195],
 )
