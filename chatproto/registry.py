@@ -3,10 +3,9 @@
 import importlib
 import os
 import pkgutil
-from typing import Dict
+from typing import Dict, List, Union
 
 from .conversation import ConversationHistory, ConversationSettings
-
 
 # A global registry for all conversation settings
 conv_settings: Dict[str, ConversationSettings] = {}
@@ -32,4 +31,3 @@ for module_loader, name, ispkg in pkgutil.iter_modules([settings_path]):
         if not isinstance(values, ConversationSettings):
             continue
         register_conv_settings(values)
-
