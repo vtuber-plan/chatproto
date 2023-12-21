@@ -23,10 +23,10 @@ def get_conv_settings(name: str) -> ConversationSettings:
     return conv_settings[name].copy()
 
 
-settings_path = os.path.join(os.path.dirname(__file__), "conversation")
+settings_path = os.path.join(os.path.dirname(__file__), "conversation", "models")
 for module_loader, name, ispkg in pkgutil.iter_modules([settings_path]):
     # print(module_loader, name, ispkg)
-    module = importlib.import_module(".models." + name, __package__)
+    module = importlib.import_module(".conversation.models." + name, __package__)
     for name, values in vars(module).items():
         if not isinstance(values, ConversationSettings):
             continue

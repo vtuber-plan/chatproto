@@ -3,7 +3,6 @@ import unittest
 from chatproto.conversation.history import ConversationHistory
 from chatproto.conversation.models.baichuan import baichuan
 
-
 class TestBaiChuanMethods(unittest.TestCase):
 
     def test_conv(self):
