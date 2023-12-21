@@ -5,7 +5,7 @@ import os
 import pkgutil
 from typing import Dict, List, Union
 
-from .conversation import ConversationHistory, ConversationSettings
+from .conversation.history import ConversationHistory, ConversationSettings
 
 # A global registry for all conversation settings
 conv_settings: Dict[str, ConversationSettings] = {}

@@ -4,6 +4,111 @@ import dataclasses
 
 from .settings import ConversationSettings, SeparatorStyle
 
+def create_system_prompt(settings: ConversationSettings, system: str) -> str:
+    system_prompt = settings.system_template.format(system_message=system)
+    return system_prompt
+
+def create_add_colon_single(settings: ConversationSettings, system: str, messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
+    indices = []
+    system_prompt = create_system_prompt(settings, system)
+    indices.append((0, len(system_prompt)))
+
+    ret = system_prompt + settings.sep
+    for i, (role, message) in enumerate(messages):
+        if message:
+            section = role + ": " + message + settings.sep
+            prefix = ret + role + ": "
+            indices.append((len(prefix), len(prefix) + len(message)))
+        else:
+            section = role + ":"
+        ret += section
+    return ret, indices
+
+def create_add_colon_two(settings: ConversationSettings, system: str, messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
+    seps = [settings.sep, settings.sep2]
+    indices = []
+    system_prompt = create_system_prompt(settings, system)
+    indices.append((0, len(system_prompt)))
+
+    ret = system_prompt + seps[0]
+    for i, (role, message) in enumerate(messages):
+        if message:
+            section = role + ": " + message + seps[i % 2]
+            prefix = ret + ": "
+            indices.append((len(prefix), len(prefix) + len(message)))
+        else:
+            section = role + ":"
+        ret += section
+    return ret, indices
+
+def create_no_colon_single(settings: ConversationSettings, system: str, messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
+    indices = []
+    system_prompt = create_system_prompt(settings, system)
+    indices.append((0, len(system_prompt)))
+
+    ret = system_prompt + settings.sep
+    for i, (role, message) in enumerate(messages):
+        if message:
+            section = role + message + settings.sep
+            prefix = ret + role
+            indices.append((len(prefix), len(prefix) + len(message)))
+        else:
+            section = role
+        ret += section
+    return ret, indices
+
+def create_no_colon_two(settings: ConversationSettings, system: str, messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
+    seps = [settings.sep, settings.sep2]
+    indices = []
+    system_prompt = create_system_prompt(settings, system)
+    indices.append((0, len(system_prompt)))
+
+    ret = system_prompt + seps[0]
+    for i, (role, message) in enumerate(messages):
+        if message:
+            section = role + message + seps[i % 2]
+            prefix = ret + role
+            indices.append((len(prefix), len(prefix) + len(message)))
+        else:
+            section = role
+        ret += section
+    return ret, indices
+
+def create_add_new_line_single(settings: ConversationSettings, system: str, messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
+    indices = []
+    system_prompt = create_system_prompt(settings, system)
+    indices.append((0, len(system_prompt)))
+
+    ret = system_prompt + settings.sep
+    for i, (role, message) in enumerate(messages):
+        if message:
+            section = role + "\n" + message + settings.sep
+            prefix = ret + role + "\n"
+            indices.append((len(prefix), len(prefix) + len(message)))
+        else:
+            section = role + "\n"
+        ret += section
+    return ret, indices
+
+def create_dolly(settings: ConversationSettings, system: str, messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
+    seps = [settings.sep, settings.sep2]
+    indices = []
+    system_prompt = create_system_prompt(settings, system)
+    indices.append((0, len(system_prompt)))
+
+    ret = system_prompt
+    for i, (role, message) in enumerate(messages):
+        if message:
+            section = role + ":\n" + message + seps[i % 2]
+            if i % 2 == 1:
+                section += "\n\n"
+            prefix = ret + role + ":\n"
+            indices.append((len(prefix), len(prefix) + len(message)))
+        else:
+            section = role + ":\n"
+        ret += section
+    return ret, indices
+
 @dataclasses.dataclass
 class ConversationHistory:
     """A class that keeps all conversation history."""
@@ -16,78 +121,50 @@ class ConversationHistory:
     offset: int
 
     settings: ConversationSettings
+
+    def get_prompt_and_indices(self) -> Tuple[str, List[Tuple[int, int]]]:
+        system_prompt = self.settings.system_template.format(system_message=self.system)
+        if self.settings.sep_style == SeparatorStyle.ADD_COLON_SINGLE:
+            ret, indices = create_add_colon_single(self.settings, self.system, self.messages)
+            return ret, indices
+        elif self.settings.sep_style == SeparatorStyle.ADD_COLON_TWO:
+            ret, indices = create_add_colon_two(self.settings, self.system, self.messages)
+            return ret, indices
+        elif self.settings.sep_style == SeparatorStyle.NO_COLON_SINGLE:
+            ret, indices = create_no_colon_single(self.settings, self.system, self.messages)
+            return ret, indices
+        elif self.settings.sep_style == SeparatorStyle.NO_COLON_TWO:
+            ret, indices = create_no_colon_two(self.settings, self.system, self.messages)
+            return ret, indices
+        elif self.settings.sep_style == SeparatorStyle.ADD_NEW_LINE_SINGLE:
+            ret, indices = create_add_new_line_single(self.settings, self.system, self.messages)
+            return ret, indices
+        elif self.settings.sep_style == SeparatorStyle.DOLLY:
+            ret, indices = create_dolly(self.settings, self.system, self.messages)
+            return ret, indices
+        else:
+            raise Exception("Indices not support yet.")
     
     def get_prompt(self) -> str:
         """Get the prompt for generation."""
-        if self.settings.round_sep is not None:
-            round_sep = self.settings.round_sep
-        else:
-            round_sep = ""
         system_prompt = self.settings.system_template.format(system_message=self.system)
         if self.settings.sep_style == SeparatorStyle.ADD_COLON_SINGLE:
-            ret = system_prompt + self.settings.sep
-            for i, (role, message) in enumerate(self.messages):
-                if i % len(self.settings.roles) == 0:
-                    ret += round_sep
-                if message:
-                    ret += role + ": " + message + self.settings.sep
-                else:
-                    ret += role + ":"
+            ret, indices = create_add_colon_single(self.settings, self.system, self.messages)
             return ret
         elif self.settings.sep_style == SeparatorStyle.ADD_COLON_TWO:
-            seps = [self.settings.sep, self.settings.sep2]
-            ret = system_prompt + seps[0]
-            
-            for i, (role, message) in enumerate(self.messages):
-                if i % len(self.settings.roles) == 0:
-                    ret += round_sep
-                if message:
-                    ret += role + ": " + message + seps[i % 2]
-                else:
-                    ret += role + ":"
+            ret, indices = create_add_colon_two(self.settings, self.system, self.messages)
             return ret
         elif self.settings.sep_style == SeparatorStyle.NO_COLON_SINGLE:
-            ret = system_prompt + self.settings.sep
-            
-            for i, (role, message) in enumerate(self.messages):
-                if i % len(self.settings.roles) == 0:
-                    ret += round_sep
-                if message:
-                    ret += role + message + self.settings.sep
-                else:
-                    ret += role
+            ret, indices = create_no_colon_single(self.settings, self.system, self.messages)
             return ret
         elif self.settings.sep_style == SeparatorStyle.NO_COLON_TWO:
-            seps = [self.settings.sep, self.settings.sep2]
-            ret = system_prompt + seps[0]
-            for i, (role, message) in enumerate(self.messages):
-                if message:
-                    ret += role + message + seps[i % 2]
-                else:
-                    ret += role
+            ret, indices = create_no_colon_two(self.settings, self.system, self.messages)
             return ret
         elif self.settings.sep_style == SeparatorStyle.ADD_NEW_LINE_SINGLE:
-            ret = "" if system_prompt == "" else system_prompt + self.settings.sep
-
-            for i, (role, message) in enumerate(self.messages):
-                if i % len(self.settings.roles) == 0:
-                    ret += round_sep
-                
-                if message:
-                    ret += role + "\n" + message + self.settings.sep
-                else:
-                    ret += role + "\n"
+            ret, indices = create_add_new_line_single(self.settings, self.system, self.messages)
             return ret
         elif self.settings.sep_style == SeparatorStyle.DOLLY:
-            seps = [self.settings.sep, self.settings.sep2]
-            ret = system_prompt
-            for i, (role, message) in enumerate(self.messages):
-                if message:
-                    ret += role + ":\n" + message + seps[i % 2]
-                    if i % 2 == 1:
-                        ret += "\n\n"
-                else:
-                    ret += role + ":\n"
+            ret, indices = create_dolly(self.settings, self.system, self.messages)
             return ret
         elif self.settings.sep_style == SeparatorStyle.RWKV:
             ret = system_prompt + self.settings.sep

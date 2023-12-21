@@ -30,7 +30,6 @@ class ConversationSettings:
     sep_style: SeparatorStyle
     sep: str
     sep2: Optional[str] = None
-    round_sep: Optional[str] = None
     # The template of the system prompt
     system_template: str = "{system_message}"
     # Stop criteria (the default one is EOS token)
@@ -46,7 +45,6 @@ class ConversationSettings:
             sep_style=self.sep_style,
             sep=self.sep,
             sep2=self.sep2,
-            round_sep=self.round_sep,
             stop_str=self.stop_str,
             stop_token_ids=self.stop_token_ids,
         )
