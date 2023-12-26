@@ -10,3 +10,6 @@ llama = ConversationSettings(
     sep2=" </s><s>",
     stop_str=["[/INST]", "[INST]"]
 )
+
+llama1 = llama.alias("llama1")
+llama2 = llama.alias("llama2")

@@ -17,7 +17,7 @@ class SeparatorStyle(Enum):
     PHOENIX = auto()
     LLAMA = auto()
     CHATGLM = auto()
-    CHATLM = auto()
+    CHATML = auto()
 
 
 @dataclasses.dataclass
@@ -40,6 +40,18 @@ class ConversationSettings:
     def copy(self):
         return ConversationSettings(
             name=self.name,
+            roles=self.roles,
+            system_template=self.system_template,
+            sep_style=self.sep_style,
+            sep=self.sep,
+            sep2=self.sep2,
+            stop_str=self.stop_str,
+            stop_token_ids=self.stop_token_ids,
+        )
+    
+    def alias(self, new_name: str):
+        return ConversationSettings(
+            name=new_name,
             roles=self.roles,
             system_template=self.system_template,
             sep_style=self.sep_style,

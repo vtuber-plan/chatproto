@@ -189,6 +189,25 @@ def create_llama(settings: ConversationSettings, system: Optional[str], messages
         ret += section
     return ret, indices
 
+def create_chatml(settings: ConversationSettings, system: Optional[str], messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
+    im_start, im_end = "<|im_start|>", "<|im_end|>"
+    indices = []
+    system_prompt = create_system_prompt(settings, system)
+    if len(system_prompt) != 0:
+        system_prompt += settings.sep
+    indices.append((0, len(system_prompt)))
+
+    ret = system_prompt
+    for i, (role, message) in enumerate(messages):
+        if message:
+            section = im_start + role + "\n" + message + im_end + settings.sep
+            prefix = ret + im_start + role + "\n"
+            indices.append((len(prefix), len(prefix) + len(message)))
+        else:
+            section = im_start + role + "\n"
+        ret += section
+    return ret, indices
+
 @dataclasses.dataclass
 class ConversationHistory:
     """A class that keeps all conversation history."""
@@ -237,6 +256,9 @@ class ConversationHistory:
         elif self.settings.sep_style == SeparatorStyle.CHATGLM:
             ret, indices = create_chatglm(self.settings, self.system, self.messages)
             return ret
+        elif self.settings.sep_style == SeparatorStyle.CHATML:
+            ret, indices = create_chatml(self.settings, self.system, self.messages)
+            return ret
         else:
             raise Exception("Indices not support yet.")
     
@@ -273,15 +295,8 @@ class ConversationHistory:
         elif self.settings.sep_style == SeparatorStyle.CHATGLM:
             ret, indices = create_chatglm(self.settings, self.system, self.messages)
             return ret
-        elif self.settings.sep_style == SeparatorStyle.CHATLM:
-            im_start, im_end = "<|im_start|>", "<|im_end|>"
-            ret = system_prompt + self.settings.sep
-
-            for i, (role, message) in enumerate(self.messages):
-                if message:
-                    ret += im_start + role + "\n" + message + im_end + self.settings.sep
-                else:
-                    ret += im_start + role + "\n"
+        elif self.settings.sep_style == SeparatorStyle.CHATML:
+            ret, indices = create_chatml(self.settings, self.system, self.messages)
             return ret
         else:
             raise ValueError(f"Invalid style: {self.settings.sep_style}")

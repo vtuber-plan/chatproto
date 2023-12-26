@@ -9,3 +9,6 @@ chatglm = ConversationSettings(
     sep="\n\n",
     stop_str="\n\n",
 )
+
+chatglm2 = chatglm.alias("chatglm2")
+chatglm3 = chatglm.alias("chatglm3")
