@@ -1,3 +1,4 @@
+from typing import List
 import unittest
 
 from chatproto.conversation.history import ConversationHistory
@@ -27,23 +28,31 @@ class TestLlamaMethods(unittest.TestCase):
                         + dialog[1]["content"],
                     }
                 ] + dialog[2:]
+            """
             assert all([msg["role"] == "user" for msg in dialog[::2]]) and all(
                 [msg["role"] == "assistant" for msg in dialog[1::2]]
             ), (
                 "model only supports 'system', 'user' and 'assistant' roles, "
                 "starting with 'system', then 'user' and alternating (u/a/u/a/u...)"
             )
-            dialog_tokens: str = "".join([
-                f"{self.B_INST} {(prompt['content']).strip()} {self.E_INST} {(answer['content']).strip()} "
+            """
+            dialog_tokens_list: List[str] =[
+                f"<s>{self.B_INST} {(prompt['content']).strip()} {self.E_INST} {(answer['content']).strip()} </s>"
                 for prompt, answer in zip(
                     dialog[::2],
                     dialog[1::2],
                 )
-            ])
+            ]
+            if len(dialog_tokens_list) > 0:
+                if dialog_tokens_list[0].startswith("<s>"):
+                    dialog_tokens_list[0] = dialog_tokens_list[0][3:]
+            dialog_tokens: str = "".join(dialog_tokens_list)
+            """
             assert (
                 dialog[-1]["role"] == "user"
             ), f"Last message must be from user, got {dialog[-1]['role']}"
-            dialog_tokens += f"{self.B_INST} {(dialog[-1]['content']).strip()} {self.E_INST}"
+            """
+            dialog_tokens += f"<s>{self.B_INST} {(dialog[-1]['content']).strip()} {self.E_INST}"
             prompt_tokens.append(dialog_tokens)
         return prompt_tokens
 

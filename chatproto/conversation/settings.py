@@ -15,8 +15,8 @@ class SeparatorStyle(Enum):
     DOLLY = auto()
     RWKV = auto()
     PHOENIX = auto()
-    CHATGLM = auto()
     LLAMA = auto()
+    CHATGLM = auto()
     CHATLM = auto()
 
 

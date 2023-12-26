@@ -4,8 +4,9 @@ from ..settings import ConversationSettings, SeparatorStyle
 llama = ConversationSettings(
     name="llama",
     system_template="[INST] <<SYS>>\n{system_message}\n<</SYS>>\n\n",
-    roles=("user", "assistant"),
+    roles=("[INST]", "[/INST]"),
     sep_style=SeparatorStyle.LLAMA,
-    sep="",
+    sep=" ",
+    sep2=" </s><s>",
     stop_str=["[/INST]", "[INST]"]
 )

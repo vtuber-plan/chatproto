@@ -1,14 +1,17 @@
 
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 import dataclasses
 
 from .settings import ConversationSettings, SeparatorStyle
 
-def create_system_prompt(settings: ConversationSettings, system: str) -> str:
-    system_prompt = settings.system_template.format(system_message=system)
+def create_system_prompt(settings: ConversationSettings, system: Optional[str]) -> str:
+    if system is None:
+        system_prompt = ""
+    else:
+        system_prompt = settings.system_template.format(system_message=system)
     return system_prompt
 
-def create_add_colon_single(settings: ConversationSettings, system: str, messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
+def create_add_colon_single(settings: ConversationSettings, system: Optional[str], messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
     indices = []
     system_prompt = create_system_prompt(settings, system)
     indices.append((0, len(system_prompt)))
@@ -24,7 +27,7 @@ def create_add_colon_single(settings: ConversationSettings, system: str, message
         ret += section
     return ret, indices
 
-def create_add_colon_two(settings: ConversationSettings, system: str, messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
+def create_add_colon_two(settings: ConversationSettings, system: Optional[str], messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
     seps = [settings.sep, settings.sep2]
     indices = []
     system_prompt = create_system_prompt(settings, system)
@@ -41,7 +44,7 @@ def create_add_colon_two(settings: ConversationSettings, system: str, messages: 
         ret += section
     return ret, indices
 
-def create_no_colon_single(settings: ConversationSettings, system: str, messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
+def create_no_colon_single(settings: ConversationSettings, system: Optional[str], messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
     indices = []
     system_prompt = create_system_prompt(settings, system)
     indices.append((0, len(system_prompt)))
@@ -57,7 +60,7 @@ def create_no_colon_single(settings: ConversationSettings, system: str, messages
         ret += section
     return ret, indices
 
-def create_no_colon_two(settings: ConversationSettings, system: str, messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
+def create_no_colon_two(settings: ConversationSettings, system: Optional[str], messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
     seps = [settings.sep, settings.sep2]
     indices = []
     system_prompt = create_system_prompt(settings, system)
@@ -74,7 +77,7 @@ def create_no_colon_two(settings: ConversationSettings, system: str, messages: L
         ret += section
     return ret, indices
 
-def create_add_new_line_single(settings: ConversationSettings, system: str, messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
+def create_add_new_line_single(settings: ConversationSettings, system: Optional[str], messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
     indices = []
     system_prompt = create_system_prompt(settings, system)
     indices.append((0, len(system_prompt)))
@@ -90,7 +93,7 @@ def create_add_new_line_single(settings: ConversationSettings, system: str, mess
         ret += section
     return ret, indices
 
-def create_dolly(settings: ConversationSettings, system: str, messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
+def create_dolly(settings: ConversationSettings, system: Optional[str], messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
     seps = [settings.sep, settings.sep2]
     indices = []
     system_prompt = create_system_prompt(settings, system)
@@ -109,12 +112,89 @@ def create_dolly(settings: ConversationSettings, system: str, messages: List[Tup
         ret += section
     return ret, indices
 
+def create_rwkv(settings: ConversationSettings, system: Optional[str], messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
+    indices = []
+    system_prompt = create_system_prompt(settings, system)
+    indices.append((0, len(system_prompt)))
+
+    ret = system_prompt
+    for i, (role, message) in enumerate(messages):
+        if message:
+            msg_clean = message.replace("\r\n", "\n").replace("\n\n", "\n")
+            section = role + ": " + msg_clean
+            prefix = ret + role + ": "
+            indices.append((len(prefix), len(prefix) + len(msg_clean)))
+        else:
+            section = role + ":"
+        ret += section
+    return ret, indices
+
+def create_phoenix(settings: ConversationSettings, system: Optional[str], messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
+    indices = []
+    system_prompt = create_system_prompt(settings, system)
+    indices.append((0, len(system_prompt)))
+
+    ret = system_prompt
+    for i, (role, message) in enumerate(messages):
+        if message:
+            section = role + ": " + "<s>" + message + "</s>"
+            prefix = ret + role + ": " + "<s>"
+            indices.append((len(prefix), len(prefix) + len(message)))
+        else:
+            section = role + ": " + "<s>"
+        ret += section
+    return ret, indices
+
+def create_chatglm(settings: ConversationSettings, system: Optional[str], messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
+    indices = []
+    system_prompt = create_system_prompt(settings, system)
+    indices.append((0, len(system_prompt)))
+
+    ret = system_prompt
+    for i, (role, message) in enumerate(messages):
+        if message:
+            section = ""
+            prefix = ""
+            if i % 2 == 0:
+                section += f"[Round {i+1}]\n\n"
+                prefix += ret + f"[Round {i+1}]\n\n"
+            section += role + "：" + message + settings.sep
+            prefix += role + "："
+            indices.append((len(prefix), len(prefix) + len(message)))
+        else:
+            section = role + "："
+        ret += section
+    return ret, indices
+
+def create_llama(settings: ConversationSettings, system: Optional[str], messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
+    seps = [settings.sep, settings.sep2]
+    indices = []
+    system_prompt = create_system_prompt(settings, system)
+    indices.append((0, len(system_prompt)))
+
+    ret = system_prompt
+    for i, (role, message) in enumerate(messages):
+        if message:
+            if i == 0:
+                section = message + " "
+                prefix = ret
+            else:
+                section = settings.roles[i % 2] + " " + message + seps[i % 2]
+                prefix = ret + settings.roles[i % 2] + " "
+            if i == len(messages) - 1:
+                section += settings.roles[(i + 1) % 2]
+            indices.append((len(prefix), len(prefix) + len(message)))
+        else:
+            section = settings.roles[i % 2]
+        ret += section
+    return ret, indices
+
 @dataclasses.dataclass
 class ConversationHistory:
     """A class that keeps all conversation history."""
 
     # System prompts
-    system: str
+    system: Optional[str]
     # All messages
     messages: List[Tuple[str, str]]
     # Offset of few shot examples
@@ -123,7 +203,10 @@ class ConversationHistory:
     settings: ConversationSettings
 
     def get_prompt_and_indices(self) -> Tuple[str, List[Tuple[int, int]]]:
-        system_prompt = self.settings.system_template.format(system_message=self.system)
+        if self.system is None:
+            system_prompt = ""
+        else:
+            system_prompt = self.settings.system_template.format(system_message=self.system)
         if self.settings.sep_style == SeparatorStyle.ADD_COLON_SINGLE:
             ret, indices = create_add_colon_single(self.settings, self.system, self.messages)
             return ret, indices
@@ -142,6 +225,18 @@ class ConversationHistory:
         elif self.settings.sep_style == SeparatorStyle.DOLLY:
             ret, indices = create_dolly(self.settings, self.system, self.messages)
             return ret, indices
+        elif self.settings.sep_style == SeparatorStyle.RWKV:
+            ret, indices = create_rwkv(self.settings, self.system, self.messages)
+            return ret
+        elif self.settings.sep_style == SeparatorStyle.PHOENIX:
+            ret, indices = create_phoenix(self.settings, self.system, self.messages)
+            return ret
+        elif self.settings.sep_style == SeparatorStyle.LLAMA:
+            ret, indices = create_llama(self.settings, self.system, self.messages)
+            return ret
+        elif self.settings.sep_style == SeparatorStyle.CHATGLM:
+            ret, indices = create_chatglm(self.settings, self.system, self.messages)
+            return ret
         else:
             raise Exception("Indices not support yet.")
     
@@ -167,65 +262,16 @@ class ConversationHistory:
             ret, indices = create_dolly(self.settings, self.system, self.messages)
             return ret
         elif self.settings.sep_style == SeparatorStyle.RWKV:
-            ret = system_prompt + self.settings.sep
-            for i, (role, message) in enumerate(self.messages):
-                if message:
-                    ret += (
-                        role
-                        + ": "
-                        + message.replace("\r\n", "\n").replace("\n\n", "\n")
-                    )
-                    ret += "\n\n"
-                else:
-                    ret += role + ":"
+            ret, indices = create_rwkv(self.settings, self.system, self.messages)
             return ret
         elif self.settings.sep_style == SeparatorStyle.PHOENIX:
-            ret = system_prompt
-            for role, message in self.messages:
-                if message:
-                    ret += role + ": " + "<s>" + message + "</s>"
-                else:
-                    ret += role + ": " + "<s>"
-            return ret
-        elif self.settings.sep_style == SeparatorStyle.CHATGLM:
-            if system_prompt:
-                ret = system_prompt + self.settings.sep
-            else:
-                ret = ""
-            for i, (role, message) in enumerate(self.messages):
-                if message:
-                    if i % 2 == 0:
-                        ret += f"[Round {i+1}]\n\n"
-                    ret += role + "：" + message + self.settings.sep
-                else:
-                    ret += role + "："
+            ret, indices = create_phoenix(self.settings, self.system, self.messages)
             return ret
         elif self.settings.sep_style == SeparatorStyle.LLAMA:
-            B_INST, E_INST = "[INST]", "[/INST]"
-            if system_prompt:
-                ret = system_prompt + self.settings.sep
-            else:
-                ret = ""
-            
-            if self.messages[0][0] == "system":
-                self.messages.pop(0)
-            for i, (role, message) in enumerate(self.messages):
-                if i % 2 == 0:
-                    inst = B_INST + " "
-                else:
-                    inst = E_INST + " "
-                if i == 0:
-                    inst = ""
-                if message:
-                    if i % 2 == 0:
-                        ret += inst + message.strip() + " "
-                    else:
-                        ret += inst + message.strip() + " "
-                    if i == len(self.messages) - 1:
-                        ret += E_INST
-                else:
-                    ret += E_INST
-
+            ret, indices = create_llama(self.settings, self.system, self.messages)
+            return ret
+        elif self.settings.sep_style == SeparatorStyle.CHATGLM:
+            ret, indices = create_chatglm(self.settings, self.system, self.messages)
             return ret
         elif self.settings.sep_style == SeparatorStyle.CHATLM:
             im_start, im_end = "<|im_start|>", "<|im_end|>"
