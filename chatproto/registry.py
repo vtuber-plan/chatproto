@@ -22,6 +22,8 @@ def get_conv_settings(name: str) -> ConversationSettings:
     """Get a ConversationSettings template."""
     return conv_settings[name].copy()
 
+def list_conv_settings() -> List[str]:
+    return list(conv_settings.keys())
 
 settings_path = os.path.join(os.path.dirname(__file__), "conversation", "models")
 for module_loader, name, ispkg in pkgutil.iter_modules([settings_path]):
