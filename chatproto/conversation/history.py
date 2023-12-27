@@ -37,7 +37,7 @@ def create_add_colon_two(settings: ConversationSettings, system: Optional[str], 
     for i, (role, message) in enumerate(messages):
         if message:
             section = role + ": " + message + seps[i % 2]
-            prefix = ret + ": "
+            prefix = ret + role + ": "
             indices.append((len(prefix), len(prefix) + len(message)))
         else:
             section = role + ":"
