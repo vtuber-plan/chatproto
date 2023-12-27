@@ -246,19 +246,19 @@ class ConversationHistory:
             return ret, indices
         elif self.settings.sep_style == SeparatorStyle.RWKV:
             ret, indices = create_rwkv(self.settings, self.system, self.messages)
-            return ret
+            return ret, indices
         elif self.settings.sep_style == SeparatorStyle.PHOENIX:
             ret, indices = create_phoenix(self.settings, self.system, self.messages)
-            return ret
+            return ret, indices
         elif self.settings.sep_style == SeparatorStyle.LLAMA:
             ret, indices = create_llama(self.settings, self.system, self.messages)
-            return ret
+            return ret, indices
         elif self.settings.sep_style == SeparatorStyle.CHATGLM:
             ret, indices = create_chatglm(self.settings, self.system, self.messages)
-            return ret
+            return ret, indices
         elif self.settings.sep_style == SeparatorStyle.CHATML:
             ret, indices = create_chatml(self.settings, self.system, self.messages)
-            return ret
+            return ret, indices
         else:
             raise Exception("Indices not support yet.")
     
