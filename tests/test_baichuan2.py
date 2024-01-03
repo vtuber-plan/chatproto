@@ -1,7 +1,7 @@
 import unittest
 
 from chatproto.conversation.history import ConversationHistory
-from chatproto.conversation.models.baichuan2 import baichuan2
+from chatproto.conversation.models.baichuan import baichuan2
 
 
 class TestBaiChuanMethods(unittest.TestCase):

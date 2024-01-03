@@ -6,7 +6,10 @@ from .settings import ConversationSettings, SeparatorStyle
 
 def create_system_prompt(settings: ConversationSettings, system: Optional[str]) -> str:
     if system is None:
-        system_prompt = ""
+        if settings.system_message is None:
+            system_prompt = ""
+        else:
+            system_prompt = settings.system_template.format(system_message=settings.system_message)
     else:
         system_prompt = settings.system_template.format(system_message=system)
     return system_prompt
@@ -90,6 +93,22 @@ def create_add_new_line_single(settings: ConversationSettings, system: Optional[
             indices.append((len(prefix), len(prefix) + len(message)))
         else:
             section = role + "\n"
+        ret += section
+    return ret, indices
+
+def create_chatglm3(settings: ConversationSettings, system: Optional[str], messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
+    indices = []
+    system_prompt = create_system_prompt(settings, system)
+    indices.append((0, len(system_prompt)))
+
+    ret = system_prompt + settings.sep
+    for i, (role, message) in enumerate(messages):
+        if message:
+            section = role + "\n" + " " + message + settings.sep
+            prefix = ret + role + "\n" + " "
+            indices.append((len(prefix), len(prefix) + len(message)))
+        else:
+            section = role
         ret += section
     return ret, indices
 
@@ -208,6 +227,22 @@ def create_chatml(settings: ConversationSettings, system: Optional[str], message
         ret += section
     return ret, indices
 
+def create_robin(settings: ConversationSettings, system: Optional[str], messages: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[int, int]]]:
+    indices = []
+    system_prompt = create_system_prompt(settings, system)
+    indices.append((0, len(system_prompt)))
+
+    ret = system_prompt + settings.sep
+    for i, (role, message) in enumerate(messages):
+        if message:
+            section = role + ":\n" + message + settings.sep
+            prefix = ret + role + ":\n"
+            indices.append((len(prefix), len(prefix) + len(message)))
+        else:
+            section = role + ":\n"
+        ret += section
+    return ret, indices
+
 @dataclasses.dataclass
 class ConversationHistory:
     """A class that keeps all conversation history."""
@@ -256,8 +291,14 @@ class ConversationHistory:
         elif self.settings.sep_style == SeparatorStyle.CHATGLM:
             ret, indices = create_chatglm(self.settings, self.system, self.messages)
             return ret, indices
+        elif self.settings.sep_style == SeparatorStyle.CHATGLM3:
+            ret, indices = create_chatglm3(self.settings, self.system, self.messages)
+            return ret, indices
         elif self.settings.sep_style == SeparatorStyle.CHATML:
             ret, indices = create_chatml(self.settings, self.system, self.messages)
+            return ret, indices
+        elif self.settings.sep_style == SeparatorStyle.ROBIN:
+            ret, indices = create_robin(self.settings, self.system, self.messages)
             return ret, indices
         else:
             raise Exception("Indices not support yet.")
@@ -295,8 +336,14 @@ class ConversationHistory:
         elif self.settings.sep_style == SeparatorStyle.CHATGLM:
             ret, indices = create_chatglm(self.settings, self.system, self.messages)
             return ret
+        elif self.settings.sep_style == SeparatorStyle.CHATGLM3:
+            ret, indices = create_chatglm3(self.settings, self.system, self.messages)
+            return ret
         elif self.settings.sep_style == SeparatorStyle.CHATML:
             ret, indices = create_chatml(self.settings, self.system, self.messages)
+            return ret
+        elif self.settings.sep_style == SeparatorStyle.ROBIN:
+            ret, indices = create_robin(self.settings, self.system, self.messages)
             return ret
         else:
             raise ValueError(f"Invalid style: {self.settings.sep_style}")

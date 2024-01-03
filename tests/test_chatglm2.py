@@ -1,7 +1,7 @@
 import unittest
 
 from chatproto.conversation.history import ConversationHistory
-from chatproto.conversation.models.chatglm import chatglm
+from chatproto.conversation.models.chatglm import chatglm2
 
 class TestChatGLMMethods(unittest.TestCase):
 
@@ -9,11 +9,11 @@ class TestChatGLMMethods(unittest.TestCase):
         history = ConversationHistory(
             "SYSTEM_MESSAGE",
             messages=[
-                (chatglm.roles[0], "aaa"),
-                (chatglm.roles[1], "bbb"),
+                (chatglm2.roles[0], "aaa"),
+                (chatglm2.roles[1], "bbb"),
             ],
             offset=0,
-            settings=chatglm
+            settings=chatglm2
         )
         self.assertEqual(history.get_prompt(), "SYSTEM_MESSAGE\n\n[Round 1]\n\n问：aaa\n\n答：bbb\n\n")
 

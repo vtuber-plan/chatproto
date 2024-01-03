@@ -17,7 +17,9 @@ class SeparatorStyle(Enum):
     PHOENIX = auto()
     LLAMA = auto()
     CHATGLM = auto()
+    CHATGLM3 = auto()
     CHATML = auto()
+    ROBIN = auto()
 
 
 @dataclasses.dataclass
@@ -30,6 +32,8 @@ class ConversationSettings:
     sep_style: SeparatorStyle
     sep: str
     sep2: Optional[str] = None
+    # Default system message
+    system_message: Optional[str] = None
     # The template of the system prompt
     system_template: str = "{system_message}"
     # Stop criteria (the default one is EOS token)
