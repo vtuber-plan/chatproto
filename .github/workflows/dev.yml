@@ -27,4 +27,4 @@ jobs:
       - name: Test ChatProto
         run: |
           cd ${{ github.workspace }}
-          python -m unittest discover ChatProto/tests
+          python -m unittest discover tests
