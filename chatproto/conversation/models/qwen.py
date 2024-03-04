@@ -16,3 +16,11 @@ qwen = ConversationSettings(
     ],  # "<|endoftext|>", "<|im_start|>", "<|im_end|>"
     stop_str="<|endoftext|>",
 )
+
+Qwen = qwen.alias("Qwen")
+
+qwen1 = qwen.alias("qwen1")
+Qwen1 = qwen.alias("Qwen1")
+
+qwen15 = qwen.alias("qwen1.5")
+Qwen15 = qwen.alias("Qwen1.5")
