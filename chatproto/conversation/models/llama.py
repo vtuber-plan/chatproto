@@ -13,3 +13,4 @@ llama = ConversationSettings(
 
 llama1 = llama.alias("llama1")
 llama2 = llama.alias("llama2")
+llama3 = llama.alias("llama3")

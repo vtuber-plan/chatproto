@@ -22,5 +22,8 @@ Qwen = qwen.alias("Qwen")
 qwen1 = qwen.alias("qwen1")
 Qwen1 = qwen.alias("Qwen1")
 
-qwen15 = qwen.alias("qwen1.5")
-Qwen15 = qwen.alias("Qwen1.5")
+qwen1_5 = qwen.alias("qwen1.5")
+Qwen1_5 = qwen.alias("Qwen1.5")
+
+qwen2 = qwen.alias("qwen2")
+Qwen2 = qwen.alias("Qwen2")
