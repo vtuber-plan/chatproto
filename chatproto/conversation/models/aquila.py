@@ -20,7 +20,6 @@ aquila_legacy = ConversationSettings(
     system_message="A chat between a curious human and an artificial intelligence assistant. "
     "The assistant gives helpful, detailed, and polite answers to the human's questions.\n\n",
     roles=("### Human: ", "### Assistant: "),
-    offset=0,
     sep_style=SeparatorStyle.NO_COLON_TWO,
     sep="\n",
     sep2="</s>",
@@ -34,7 +33,6 @@ aquila = ConversationSettings(
     system_message="A chat between a curious human and an artificial intelligence assistant. "
     "The assistant gives helpful, detailed, and polite answers to the human's questions.",
     roles=("Human", "Assistant"),
-    offset=0,
     sep_style=SeparatorStyle.ADD_COLON_TWO,
     sep="###",
     sep2="</s>",
@@ -47,7 +45,6 @@ aquila = ConversationSettings(
 aquila_v1 = ConversationSettings(
     name="aquila-v1",
     roles=("<|startofpiece|>", "<|endofpiece|>"),
-    offset=0,
     sep_style=SeparatorStyle.NO_COLON_TWO,
     sep="",
     sep2="</s>",
